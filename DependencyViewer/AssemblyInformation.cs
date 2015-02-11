@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace DependencyViewer
 {
+    /// <summary>
+    /// Provides a collection of information that might be useful to know about a .NET assembly
+    /// </summary>
     class AssemblyInformation
     {
         public string Name = string.Empty;
@@ -19,7 +22,6 @@ namespace DependencyViewer
         public string Arch = string.Empty;
         public bool DotNetAssembly;
         public AssemblyName[] ReferencedAssembliesRaw;
-        public Dictionary<AssemblyName, AssemblyResovled> ReferencedAssmeblies = new Dictionary<AssemblyName, AssemblyResovled>();
         public List<AssemblyInformation> ChildAssemblies = new List<AssemblyInformation>();
         public List<AssemblyInformation> ParentAssemblies = new List<AssemblyInformation>();
         public bool AllResolved = false;

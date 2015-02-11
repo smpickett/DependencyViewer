@@ -11,22 +11,21 @@ namespace DependencyViewer
 {
     public class DependencyViewer
     {
+        private Dictionary<string, AssemblyInformation> AsmCollection = new Dictionary<string, AssemblyInformation>();
+        private string[] Files = { };
+
         public DependencyViewer(string root)
         {
             string[] dlls = Directory.GetFiles(root, "*.dll", SearchOption.AllDirectories);
             string[] exes = Directory.GetFiles(root, "*.exe", SearchOption.AllDirectories);
-            string[] system = { };// Directory.GetFiles(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(), "*.dll", SearchOption.AllDirectories);
 
-            Files = dlls.Concat(exes).Concat(system).ToArray();
+            Files = dlls.Concat(exes).ToArray();
 
             foreach (var file in Files)
                 GatherInformation(file);
 
             FindRelationships();
         }
-
-        private Dictionary<string, AssemblyInformation> AsmCollection = new Dictionary<string, AssemblyInformation>();
-        private string[] Files = { };
 
 
         private void FindRelationships()
@@ -78,8 +77,7 @@ namespace DependencyViewer
             }
         }
 
-
-        public void DrawTable2()
+        public void DrawTable()
         {
             string[] headings = {
                 "Assembly Name",
@@ -163,48 +161,6 @@ namespace DependencyViewer
             Console.WriteLine(header);
         }
 
-
-
-        private void PrintReferences(AssemblyInformation info, int lenName, int lenVerAsm, int lenVerFile, int lenVerProduct, int lenRes, int level)
-        {
-            foreach (var asmref in info.ReferencedAssmeblies)
-            {
-                if (asmref.Key.Name == "mscorlib") continue;
-                if (asmref.Key.Name == "WindowsBase") continue;
-                if (asmref.Key.Name == "PresentationCore") continue;
-                if (asmref.Key.Name == "PresentationFramework") continue; 
-                if (asmref.Key.Name.StartsWith("System")) continue;
-                if (asmref.Key.Name.StartsWith("Microsoft")) continue;
-
-                if (asmref.Value.Resolved)
-                {
-                    var foundref = AsmCollection.FirstOrDefault(kvp => kvp.Key == asmref.Key.FullName);
-                    Console.WriteLine(String.Format("| {5}-{0} | {1} | {2} | {3} | {4} |",
-                        foundref.Value.Name.PadRight(lenName).Substring(0, lenName - level),
-                        foundref.Value.VersionAsm.PadRight(lenVerAsm),
-                        foundref.Value.VersionFile.PadRight(lenVerFile),
-                        foundref.Value.VersionProduct.PadRight(lenVerProduct),
-                        foundref.Value.AllResolved ? "Yes".PadRight(lenRes) : "No".PadRight(lenRes),
-                        "".PadRight(level)
-                        ));
-
-                    PrintReferences(foundref.Value as AssemblyInformation, lenName, lenVerAsm, lenVerFile, lenVerProduct, lenRes, level + 2);
-                }
-                else
-                {
-                    Console.WriteLine(String.Format("| {5}-{0} | {1} | {2} | {3} | {4} |",
-                        asmref.Key.Name.PadRight(lenName).Substring(0, lenName - level),
-                        asmref.Key.Version.ToString().PadRight(lenVerAsm),
-                        "".PadRight(lenVerFile),
-                        "".PadRight(lenVerProduct),
-                        "***".PadRight(lenRes),
-                        "".PadRight(level)
-                        ));
-                }
-            }
-        }
-
-
         public void GatherInformation(string file)
         {
             if (!File.Exists(file))
@@ -229,8 +185,6 @@ namespace DependencyViewer
 
                 var asm = Assembly.LoadFrom(file);
                 info.ReferencedAssembliesRaw = asm.GetReferencedAssemblies();
-                foreach (var refasm in asm.GetReferencedAssemblies())
-                    info.ReferencedAssmeblies.Add(refasm, new AssemblyResovled() { Resolved = false });
                 
                 if (!AsmCollection.Keys.Contains(AssemblyName.GetAssemblyName(file).FullName))
                     AsmCollection.Add(AssemblyName.GetAssemblyName(file).FullName, info);
