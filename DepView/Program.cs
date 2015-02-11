@@ -12,6 +12,7 @@ namespace DepView
         {
             if (args.Length == 0)
             {
+                Console.WriteLine();
                 Console.WriteLine("Use: DepView <root path>");
                 Console.WriteLine("    where <root Path> is the root directory of the .NET assemblies to look through");
             }
@@ -21,8 +22,6 @@ namespace DepView
                 var info = new DependencyViewer.DependencyViewer(args[0]);
                 info.DrawTable();
             }
-
-            Console.ReadKey();
         }
     }
 }

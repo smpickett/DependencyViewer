@@ -16,15 +16,22 @@ namespace DependencyViewer
 
         public DependencyViewer(string root)
         {
-            string[] dlls = Directory.GetFiles(root, "*.dll", SearchOption.AllDirectories);
-            string[] exes = Directory.GetFiles(root, "*.exe", SearchOption.AllDirectories);
+            try
+            {
+                string[] dlls = Directory.GetFiles(root, "*.dll", SearchOption.AllDirectories);
+                string[] exes = Directory.GetFiles(root, "*.exe", SearchOption.AllDirectories);
 
-            Files = dlls.Concat(exes).ToArray();
+                Files = dlls.Concat(exes).ToArray();
 
-            foreach (var file in Files)
-                GatherInformation(file);
+                foreach (var file in Files)
+                    GatherInformation(file);
 
-            FindRelationships();
+                FindRelationships();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine("One of the paths is inaccessable: " + ex.Message);
+            }
         }
 
 
@@ -80,6 +87,12 @@ namespace DependencyViewer
 
         public void DrawTable()
         {
+            if (AsmCollection.Count == 0)
+            {
+                Console.WriteLine("There are no assemblies to print.");
+                return;
+            }
+
             string[] headings = {
                 "Assembly Name",
                 "Ver Asm",
@@ -210,6 +223,8 @@ namespace DependencyViewer
                 if (!AsmCollection.Keys.Contains(file))
                     AsmCollection.Add(file, info);
             }
+            catch (Exception)
+            { }
         }
     }
 }
