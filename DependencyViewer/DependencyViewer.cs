@@ -68,7 +68,8 @@ namespace DependencyViewer
                             continue;
                         }
 
-                        asm.ResolvedNote = refasm.Version.ToString() + " > " + found.VersionAsm;
+                        if (refasm.Version.ToString() != found.VersionAsm)
+                            asm.ResolvedNote += refasm.Version.ToString() + " -> " + found.VersionAsm;
 
                         asm.ChildAssemblies.Add(found);
                         found.ParentAssemblies.Add(asm);
@@ -174,7 +175,7 @@ namespace DependencyViewer
             info.File = Path.GetFileName(file);
             info.VersionProduct = FileVersionInfo.GetVersionInfo(file).ProductVersion ?? string.Empty;
             info.VersionFile = FileVersionInfo.GetVersionInfo(file).FileVersion ?? string.Empty;
-            
+
             try
             {
                 info.DotNetAssembly = true;
@@ -185,7 +186,18 @@ namespace DependencyViewer
 
                 var asm = Assembly.LoadFrom(file);
                 info.ReferencedAssembliesRaw = asm.GetReferencedAssemblies();
-                
+
+                if (!AsmCollection.Keys.Contains(AssemblyName.GetAssemblyName(file).FullName))
+                    AsmCollection.Add(AssemblyName.GetAssemblyName(file).FullName, info);
+            }
+            catch (FileLoadException)
+            {
+                info.VersionAsm = AssemblyName.GetAssemblyName(file).Version.ToString();
+                info.Name = AssemblyName.GetAssemblyName(file).Name;
+                info.StronglySigned = AssemblyName.GetAssemblyName(file).GetPublicKeyToken().Length != 0;
+                info.Arch = AssemblyName.GetAssemblyName(file).ProcessorArchitecture.ToString();
+                info.ResolvedNote = "Unable to load";
+
                 if (!AsmCollection.Keys.Contains(AssemblyName.GetAssemblyName(file).FullName))
                     AsmCollection.Add(AssemblyName.GetAssemblyName(file).FullName, info);
             }
@@ -194,7 +206,9 @@ namespace DependencyViewer
                 info.DotNetAssembly = false;
                 info.Name = Path.GetFileName(file);
                 info.VersionAsm = string.Empty;
-                AsmCollection.Add(file, info);
+
+                if (!AsmCollection.Keys.Contains(file))
+                    AsmCollection.Add(file, info);
             }
         }
     }
