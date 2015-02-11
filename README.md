@@ -9,7 +9,7 @@ This console application will
  - List missing assemblies
  - Indicate likely assembly binding redirect
  
-Useage
+Usage
 ----------------
     DepView <root path>
   where [root Path] is the root directory of the .NET assemblies to look through.
