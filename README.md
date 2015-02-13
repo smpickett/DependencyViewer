@@ -1,4 +1,4 @@
-# DependencyViewer
+# Dependency Viewer
 Helps find those run-time assembly issues by generating a simple dependency graph
 
 Summary
