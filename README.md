@@ -1,5 +1,5 @@
 # DependencyViewer
-Helps find those run-time assembly issues
+Helps find those run-time assembly issues by generating a simple dependency graph
 
 Summary
 ------------
